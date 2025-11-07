@@ -48,6 +48,8 @@ class Task():
         self.root_password = None
         self.start_time = None
         self.stop_signal = None
+        self.cap_add = self.config.get("cap_add", {})
+        self.cap_drop = self.config.get("cap_drop", {})
         self.name = self.config.get("name", self.__class__.__name__)
         self.set_container_name(self.name)
         self.log = logger.IdenfierAdapter(self.name)
@@ -169,7 +171,9 @@ class Task():
                            'environment': env,
                            'stop_signal': self.stop_signal,
                            'network_mode': self.host_network,
-                           'extra_hosts': self.extra_hosts
+                           'extra_hosts': self.extra_hosts,
+                           'cap_add': self.cap_add,
+                           'cap_drop': self.cap_drop
                           }
 
         self.log.info("container {} prepared".format(self.container_name))
