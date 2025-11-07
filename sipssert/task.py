@@ -241,7 +241,7 @@ class Task():
         return self.config.get("env", env_file_dict)
 
     def run(self):
-        self.log.debug(f"running {self.image}: {self.args_dict['command']}")
+        self.log.debug(f"running {self.image}: {self.args_dict['command']} sysctls: {self.args_dict['sysctls']}")
         self.container = self.controller.docker.containers.create(**self.args_dict)
 
         if not self.host_network:
