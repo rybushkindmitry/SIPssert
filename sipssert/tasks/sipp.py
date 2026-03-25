@@ -107,10 +107,7 @@ class SIPPTask(Task):
                      f"{self.logs_mount_point}/{self.name}_errors.log",
                      "-trace_msg",
                      "-message_file",
-                     f"{self.logs_mount_point}/{self.name}_messages.log",
-                     "-trace_shortmessage",
-                     "-shortmessage_file",
-                     f"{self.logs_mount_point}/{self.name}_shortmessages.log"]
+                     f"{self.logs_mount_point}/{self.name}_messages.log"]
 
         return args
 

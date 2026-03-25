@@ -57,10 +57,8 @@ class TestSIPPTaskArgsWithLogs:
         args = task.get_task_args()
         assert "-log_file" in args
         assert "-message_file" in args
-        assert "-shortmessage_file" in args
         assert "-trace_err" in args
         assert "-trace_msg" in args
-        assert "-trace_shortmessage" in args
 
     def test_log_file_path_uses_name(self):
         task = make_sipp_task(name="caller")
@@ -75,13 +73,6 @@ class TestSIPPTaskArgsWithLogs:
         args = task.get_task_args()
         idx = args.index("-message_file")
         assert args[idx + 1] == "/sipssert_logs/caller_messages.log"
-
-    def test_shortmessage_file_path_uses_name(self):
-        task = make_sipp_task(name="caller")
-        task.logs_dir = "/run/logs/scenario1"
-        args = task.get_task_args()
-        idx = args.index("-shortmessage_file")
-        assert args[idx + 1] == "/sipssert_logs/caller_shortmessages.log"
 
     def test_custom_mount_point_used_in_args(self):
         task = make_sipp_task(name="caller")
@@ -99,7 +90,6 @@ class TestSIPPTaskArgsWithoutLogs:
         args = task.get_task_args()
         assert "-log_file" not in args
         assert "-message_file" not in args
-        assert "-shortmessage_file" not in args
 
     def test_no_log_args_when_logs_mount_disabled(self):
         task = make_sipp_task(logs_mount=False)
