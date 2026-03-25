@@ -31,6 +31,7 @@ class SIPPTask(Task):
 
     default_image = "ctaloi/sipp"
     default_daemon = False
+    default_logs_mount = True
 
     def __init__(self, test_dir, config):
         super().__init__(test_dir, config)
@@ -102,6 +103,14 @@ class SIPPTask(Task):
 
         if self.proxy:
             args.append(self.proxy)
+
+        if self.logs_dir and self.logs_mount:
+            args += ["-log_file",
+                     f"{self.logs_mount_point}/{self.name}_errors.log"]
+            args += ["-message_file",
+                     f"{self.logs_mount_point}/{self.name}_messages.log"]
+            args += ["-shortmessage_file",
+                     f"{self.logs_mount_point}/{self.name}_shortmessages.log"]
 
         return args
 
