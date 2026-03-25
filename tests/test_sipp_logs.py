@@ -81,6 +81,14 @@ class TestSIPPTaskArgsWithLogs:
         idx = args.index("-shortmessage_file")
         assert args[idx + 1] == "/sipssert_logs/caller_shortmessages.log"
 
+    def test_custom_mount_point_used_in_args(self):
+        task = make_sipp_task(name="caller")
+        task.logs_dir = "/run/logs/scenario1"
+        task.logs_mount_point = "/custom/output"
+        args = task.get_task_args()
+        idx = args.index("-log_file")
+        assert args[idx + 1] == "/custom/output/caller_errors.log"
+
 
 class TestSIPPTaskArgsWithoutLogs:
     def test_no_log_args_when_logs_dir_not_set(self):
@@ -96,11 +104,3 @@ class TestSIPPTaskArgsWithoutLogs:
         task.logs_dir = "/run/logs/scenario1"
         args = task.get_task_args()
         assert "-log_file" not in args
-
-    def test_custom_mount_point_used_in_args(self):
-        task = make_sipp_task(name="caller")
-        task.logs_dir = "/run/logs/scenario1"
-        task.logs_mount_point = "/custom/output"
-        args = task.get_task_args()
-        idx = args.index("-log_file")
-        assert args[idx + 1] == "/custom/output/caller_errors.log"
