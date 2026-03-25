@@ -21,6 +21,7 @@ def make_task(logs_mount=None, logs_mount_point=None):
     task.config.get = lambda key, default=None: config.get(key, default)
     task.volumes = {}
     task.logs_dir = None
+    task.container = None
     task.logs_mount = config.get("logs_mount", Task.default_logs_mount)
     task.logs_mount_point = config.get(
         "logs_mount_point", Task.default_logs_mount_point
@@ -72,3 +73,4 @@ class TestSetLogsDirWithMount:
         task.set_logs_dir("/run/logs/second")
         assert "/run/logs/second" in task.volumes
         assert task.logs_dir == "/run/logs/second"
+        assert "/run/logs/first" not in task.volumes
