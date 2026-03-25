@@ -103,7 +103,7 @@ class SIPPTask(Task):
 
         if self.logs_dir and self.logs_mount:
             args += ["-trace_err",
-                     "-log_file",
+                     "-error_file",
                      f"{self.logs_mount_point}/{self.name}_errors.log",
                      "-trace_msg",
                      "-message_file",

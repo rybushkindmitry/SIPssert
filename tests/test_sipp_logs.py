@@ -55,16 +55,16 @@ class TestSIPPTaskArgsWithLogs:
         task = make_sipp_task()
         task.logs_dir = "/run/logs/scenario1"
         args = task.get_task_args()
-        assert "-log_file" in args
+        assert "-error_file" in args
         assert "-message_file" in args
         assert "-trace_err" in args
         assert "-trace_msg" in args
 
-    def test_log_file_path_uses_name(self):
+    def test_error_file_path_uses_name(self):
         task = make_sipp_task(name="caller")
         task.logs_dir = "/run/logs/scenario1"
         args = task.get_task_args()
-        idx = args.index("-log_file")
+        idx = args.index("-error_file")
         assert args[idx + 1] == "/sipssert_logs/caller_errors.log"
 
     def test_message_file_path_uses_name(self):
@@ -79,7 +79,7 @@ class TestSIPPTaskArgsWithLogs:
         task.logs_dir = "/run/logs/scenario1"
         task.logs_mount_point = "/custom/output"
         args = task.get_task_args()
-        idx = args.index("-log_file")
+        idx = args.index("-error_file")
         assert args[idx + 1] == "/custom/output/caller_errors.log"
 
 
@@ -88,11 +88,11 @@ class TestSIPPTaskArgsWithoutLogs:
         task = make_sipp_task()
         task.logs_dir = None
         args = task.get_task_args()
-        assert "-log_file" not in args
+        assert "-error_file" not in args
         assert "-message_file" not in args
 
     def test_no_log_args_when_logs_mount_disabled(self):
         task = make_sipp_task(logs_mount=False)
         task.logs_dir = "/run/logs/scenario1"
         args = task.get_task_args()
-        assert "-log_file" not in args
+        assert "-error_file" not in args
