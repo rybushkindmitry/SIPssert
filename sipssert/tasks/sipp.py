@@ -101,9 +101,6 @@ class SIPPTask(Task):
             args.append("-d")
             args.append(self.duration)
 
-        if self.proxy:
-            args.append(self.proxy)
-
         if self.logs_dir and self.logs_mount:
             args += ["-log_file",
                      f"{self.logs_mount_point}/{self.name}_errors.log"]
@@ -111,6 +108,9 @@ class SIPPTask(Task):
                      f"{self.logs_mount_point}/{self.name}_messages.log"]
             args += ["-shortmessage_file",
                      f"{self.logs_mount_point}/{self.name}_shortmessages.log"]
+
+        if self.proxy:
+            args.append(self.proxy)
 
         return args
 
