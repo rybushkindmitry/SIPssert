@@ -47,6 +47,7 @@ class Task():
         self.volumes = self.config.get("volumes", {})
         self.logs_dir = None
         self._logs_mount_path = None
+        self._logs_mount = None
         self.container = None
         self.root_password = None
         self.start_time = None
@@ -129,12 +130,18 @@ class Task():
         self.container_name = re.sub(r'[^a-zA-Z0-9_\.\-]', "_", name)
 
     def set_logs_dir(self, path):
-        if self._logs_mount_path and self._logs_mount_path in self.volumes:
-            del self.volumes[self._logs_mount_path]
+        if self._logs_mount_path:
             self._logs_mount_path = None
+            self._logs_mount = None
         self.logs_dir = path
         if path and self.logs_mount:
-            self.volumes[path] = {"bind": self.logs_mount_point, "mode": "rw"}
+            from docker.types import Mount
+            self._logs_mount = Mount(
+                target=self.logs_mount_point,
+                source=path,
+                type='bind',
+                read_only=False
+            )
             self._logs_mount_path = path
 
     def add_volume_dir(self, path, dest=None, mode="ro"):
@@ -178,6 +185,7 @@ class Task():
                            'detach': True,
                            'healthcheck': self.healthcheck,
                            'volumes': self.volumes,
+                           'mounts': [self._logs_mount] if self._logs_mount else [],
                            'ports': self.ports,
                            'name': self.container_name,
                            'environment': env,

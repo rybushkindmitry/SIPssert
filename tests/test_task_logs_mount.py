@@ -1,5 +1,22 @@
 """Tests for Task logs_mount feature."""
+import sys
+import types as python_types
 from unittest.mock import MagicMock
+
+
+class FakeMount:
+    """Minimal stand-in for docker.types.Mount."""
+    def __init__(self, target, source, type, read_only):
+        self.target = target
+        self.source = source
+        self.type = type
+        self.read_only = read_only
+
+
+# Inject stub module so `from docker.types import Mount` works in tests
+_fake_docker_types = python_types.ModuleType("docker.types")
+_fake_docker_types.Mount = FakeMount
+sys.modules.setdefault("docker.types", _fake_docker_types)
 
 
 def make_task(logs_mount=None, logs_mount_point=None):
@@ -21,6 +38,7 @@ def make_task(logs_mount=None, logs_mount_point=None):
     task.volumes = {}
     task.logs_dir = None
     task._logs_mount_path = None
+    task._logs_mount = None
     task.container = None
     task.logs_mount = config.get("logs_mount", Task.default_logs_mount)
     task.logs_mount_point = config.get(
@@ -38,7 +56,7 @@ class TestSetLogsDirBase:
     def test_no_mount_when_logs_mount_false(self):
         task = make_task(logs_mount=False)
         task.set_logs_dir("/some/logs")
-        assert "/some/logs" not in task.volumes
+        assert task._logs_mount is None
 
     def test_default_logs_mount_is_false(self):
         from sipssert.task import Task
@@ -47,37 +65,52 @@ class TestSetLogsDirBase:
     def test_no_mount_when_path_is_none(self):
         task = make_task(logs_mount=True)
         task.set_logs_dir(None)
+        assert task._logs_mount is None
         assert task.volumes == {}
 
 
 class TestSetLogsDirWithMount:
-    def test_adds_volume_when_logs_mount_true(self):
+    def test_creates_mount_when_logs_mount_true(self):
         task = make_task(logs_mount=True)
         task.set_logs_dir("/run/logs/scenario1")
-        assert "/run/logs/scenario1" in task.volumes
-        assert task.volumes["/run/logs/scenario1"]["bind"] == "/sipssert_logs"
-        assert task.volumes["/run/logs/scenario1"]["mode"] == "rw"
+        assert task._logs_mount is not None
+        assert isinstance(task._logs_mount, FakeMount)
+
+    def test_mount_target_is_mount_point(self):
+        task = make_task(logs_mount=True)
+        task.set_logs_dir("/run/logs/scenario1")
+        assert task._logs_mount.target == "/sipssert_logs"
+
+    def test_mount_source_is_path(self):
+        task = make_task(logs_mount=True)
+        task.set_logs_dir("/run/logs/scenario1")
+        assert task._logs_mount.source == "/run/logs/scenario1"
+
+    def test_mount_is_readwrite(self):
+        task = make_task(logs_mount=True)
+        task.set_logs_dir("/run/logs/scenario1")
+        assert task._logs_mount.read_only is False
 
     def test_custom_mount_point(self):
         task = make_task(logs_mount=True, logs_mount_point="/custom/path")
         task.set_logs_dir("/run/logs/scenario1")
-        assert task.volumes["/run/logs/scenario1"]["bind"] == "/custom/path"
+        assert task._logs_mount.target == "/custom/path"
 
     def test_default_mount_point_value(self):
         from sipssert.task import Task
         assert Task.default_logs_mount_point == "/sipssert_logs"
 
-    def test_second_set_logs_dir_updates_volume(self):
+    def test_second_set_logs_dir_updates_mount(self):
         task = make_task(logs_mount=True)
         task.set_logs_dir("/run/logs/first")
         task.set_logs_dir("/run/logs/second")
-        assert "/run/logs/second" in task.volumes
+        assert task._logs_mount.source == "/run/logs/second"
         assert task.logs_dir == "/run/logs/second"
-        assert "/run/logs/first" not in task.volumes
+        assert task._logs_mount_path == "/run/logs/second"
 
-    def test_second_set_logs_dir_does_not_delete_user_volumes(self):
+    def test_second_set_logs_dir_does_not_touch_user_volumes(self):
         task = make_task(logs_mount=False)
-        # simulate a user-defined volume with the same path as logs_dir
+        # simulate a user-defined volume
         task.volumes["/run/logs/first"] = {"bind": "/external", "mode": "ro"}
         task.set_logs_dir("/run/logs/first")
         task.set_logs_dir("/run/logs/second")
