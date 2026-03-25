@@ -1,6 +1,5 @@
 """Tests for Task logs_mount feature."""
-import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 
 def make_task(logs_mount=None, logs_mount_point=None):

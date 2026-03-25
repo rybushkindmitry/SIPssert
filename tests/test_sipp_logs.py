@@ -1,6 +1,5 @@
 """Tests for SIPPTask log file arguments."""
-import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 
 def make_sipp_task(logs_mount=None, name="my_sipp"):
