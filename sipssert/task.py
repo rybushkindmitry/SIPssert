@@ -35,6 +35,8 @@ class Task():
     default_mount_point = '/home'
     default_stop_timeout = 0
     default_console_log = False
+    default_logs_mount = False
+    default_logs_mount_point = '/sipssert_logs'
 
     def __init__(self, test_dir, configuration):
         self.config = configuration
@@ -60,6 +62,9 @@ class Task():
         self.extra_hosts = self.config.get("extra_hosts", {})
         self.sysctls = self.config.get("sysctls", {})
         self.working_dir = self.config.get("working_dir")
+        self.logs_mount = self.config.get("logs_mount", self.default_logs_mount)
+        self.logs_mount_point = self.config.get("logs_mount_point",
+                                                 self.default_logs_mount_point)
         self.deps = dependencies.parse_dependencies(self.config.get("require"))
         # keep this for backwards compatibility
         self.delay_start = self.config.get("delay_start", 0)
@@ -123,7 +128,12 @@ class Task():
         self.container_name = re.sub(r'[^a-zA-Z0-9_\.\-]', "_", name)
 
     def set_logs_dir(self, path):
+        # Remove previous logs volume if it exists
+        if self.logs_dir and self.logs_dir in self.volumes:
+            del self.volumes[self.logs_dir]
         self.logs_dir = path
+        if path and self.logs_mount:
+            self.volumes[path] = {"bind": self.logs_mount_point, "mode": "rw"}
 
     def add_volume_dir(self, path, dest=None, mode="ro"):
         mount_point = dest if dest else self.mount_point
