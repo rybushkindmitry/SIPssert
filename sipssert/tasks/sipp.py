@@ -109,9 +109,15 @@ class SIPPTask(Task):
             args += ["-shortmessage_file",
                      f"{self.logs_mount_point}/{self.name}_shortmessages.log"]
 
+        return args
+
+    def get_args(self):
+
+        """Returns the full arguments with proxy always last"""
+
+        args = super().get_args()
         if self.proxy:
             args.append(self.proxy)
-
         return args
 
 # vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
