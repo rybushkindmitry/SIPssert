@@ -21,6 +21,7 @@ def make_task(logs_mount=None, logs_mount_point=None):
     task.config.get = lambda key, default=None: config.get(key, default)
     task.volumes = {}
     task.logs_dir = None
+    task._logs_mount_path = None
     task.container = None
     task.logs_mount = config.get("logs_mount", Task.default_logs_mount)
     task.logs_mount_point = config.get(
@@ -74,3 +75,13 @@ class TestSetLogsDirWithMount:
         assert "/run/logs/second" in task.volumes
         assert task.logs_dir == "/run/logs/second"
         assert "/run/logs/first" not in task.volumes
+
+    def test_second_set_logs_dir_does_not_delete_user_volumes(self):
+        task = make_task(logs_mount=False)
+        # simulate a user-defined volume with the same path as logs_dir
+        task.volumes["/run/logs/first"] = {"bind": "/external", "mode": "ro"}
+        task.set_logs_dir("/run/logs/first")
+        task.set_logs_dir("/run/logs/second")
+        # user-defined volume must not be deleted
+        assert "/run/logs/first" in task.volumes
+        assert task.volumes["/run/logs/first"]["bind"] == "/external"

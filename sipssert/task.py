@@ -46,6 +46,7 @@ class Task():
         self.test_dir = test_dir
         self.volumes = self.config.get("volumes", {})
         self.logs_dir = None
+        self._logs_mount_path = None
         self.container = None
         self.root_password = None
         self.start_time = None
@@ -128,12 +129,13 @@ class Task():
         self.container_name = re.sub(r'[^a-zA-Z0-9_\.\-]', "_", name)
 
     def set_logs_dir(self, path):
-        # Remove previous logs volume if it exists
-        if self.logs_dir and self.logs_dir in self.volumes:
-            del self.volumes[self.logs_dir]
+        if self._logs_mount_path and self._logs_mount_path in self.volumes:
+            del self.volumes[self._logs_mount_path]
+            self._logs_mount_path = None
         self.logs_dir = path
         if path and self.logs_mount:
             self.volumes[path] = {"bind": self.logs_mount_point, "mode": "rw"}
+            self._logs_mount_path = path
 
     def add_volume_dir(self, path, dest=None, mode="ro"):
         mount_point = dest if dest else self.mount_point
