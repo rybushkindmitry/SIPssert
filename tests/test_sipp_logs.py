@@ -58,6 +58,9 @@ class TestSIPPTaskArgsWithLogs:
         assert "-log_file" in args
         assert "-message_file" in args
         assert "-shortmessage_file" in args
+        assert "-trace_err" in args
+        assert "-trace_msg" in args
+        assert "-trace_shortmessage" in args
 
     def test_log_file_path_uses_name(self):
         task = make_sipp_task(name="caller")

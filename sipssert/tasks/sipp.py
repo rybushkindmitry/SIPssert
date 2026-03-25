@@ -102,11 +102,14 @@ class SIPPTask(Task):
             args.append(self.duration)
 
         if self.logs_dir and self.logs_mount:
-            args += ["-log_file",
-                     f"{self.logs_mount_point}/{self.name}_errors.log"]
-            args += ["-message_file",
-                     f"{self.logs_mount_point}/{self.name}_messages.log"]
-            args += ["-shortmessage_file",
+            args += ["-trace_err",
+                     "-log_file",
+                     f"{self.logs_mount_point}/{self.name}_errors.log",
+                     "-trace_msg",
+                     "-message_file",
+                     f"{self.logs_mount_point}/{self.name}_messages.log",
+                     "-trace_shortmessage",
+                     "-shortmessage_file",
                      f"{self.logs_mount_point}/{self.name}_shortmessages.log"]
 
         return args

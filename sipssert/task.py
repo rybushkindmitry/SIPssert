@@ -143,6 +143,7 @@ class Task():
                 read_only=False
             )
             self._logs_mount_path = path
+            self.log.debug("logs mount: {} -> {}".format(path, self.logs_mount_point))
 
     def add_volume_dir(self, path, dest=None, mode="ro"):
         mount_point = dest if dest else self.mount_point

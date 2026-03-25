@@ -40,6 +40,7 @@ def make_task(logs_mount=None, logs_mount_point=None):
     task._logs_mount_path = None
     task._logs_mount = None
     task.container = None
+    task.log = MagicMock()
     task.logs_mount = config.get("logs_mount", Task.default_logs_mount)
     task.logs_mount_point = config.get(
         "logs_mount_point", Task.default_logs_mount_point
