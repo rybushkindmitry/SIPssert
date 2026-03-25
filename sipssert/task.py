@@ -189,7 +189,8 @@ class Task():
             if isinstance(args, int):
                 args = [str(args)]
             elif not isinstance(args, list):
-                args = args.split(" ")
+                import shlex
+                args = shlex.split(str(args))
             else:
                 args = [ str(x) for x in args ]
         else:
